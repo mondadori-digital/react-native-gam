@@ -19,7 +19,7 @@ static NSString *const kEventAdLeftApplication = @"interstitialAdLeftApplication
 
 @implementation RNGAMInterstitial
 {
-    GAMInterstitial  *_interstitial;
+    GAMInterstitialAd  *_interstitial;
     NSString *_adUnitID;
     NSString *_amazonSlotUUID;
     NSArray *_testDevices;
@@ -75,7 +75,7 @@ RCT_EXPORT_METHOD(requestAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromise
     _requestAdResolve = nil;
     _requestAdReject = nil;
 
-    if ([_interstitial hasBeenUsed] || _interstitial == nil) {
+    if (_interstitial == nil) {
         _requestAdResolve = resolve;
         _requestAdReject = reject;
 
@@ -89,6 +89,7 @@ RCT_EXPORT_METHOD(requestAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromise
         } else {
             [self requestInterstitial];
         }
+       
     } else {
         reject(@"E_AD_ALREADY_LOADED", @"Ad is already loaded.", nil);
     }
@@ -96,18 +97,13 @@ RCT_EXPORT_METHOD(requestAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromise
 
 RCT_EXPORT_METHOD(showAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
-    if ([_interstitial isReady]) {
+    if (_interstitial) {
         [_interstitial presentFromRootViewController:[UIApplication sharedApplication].delegate.window.rootViewController];
         resolve(nil);
     }
     else {
         reject(@"E_AD_NOT_READY", @"Ad is not ready.", nil);
     }
-}
-
-RCT_EXPORT_METHOD(isReady:(RCTResponseSenderBlock)callback)
-{
-    callback(@[[NSNumber numberWithBool:[_interstitial isReady]]]);
 }
 
 - (void)startObserving
@@ -121,9 +117,7 @@ RCT_EXPORT_METHOD(isReady:(RCTResponseSenderBlock)callback)
 }
 
 - (void)requestInterstitial {
-    _interstitial = [[GAMInterstitial alloc] initWithAdUnitID:_adUnitID];
-    _interstitial.delegate = self;
-
+    
     [[Criteo sharedCriteo] loadBidForAdUnit:[RNGAMConfig sharedInstance].GAM2Criteo[@"interstitial"] responseHandler:^(CRBid *bid) {
 
         NSLog(@"Criteo - unit %@", [RNGAMConfig sharedInstance].GAM2Criteo[@"interstitial"]);
@@ -142,8 +136,18 @@ RCT_EXPORT_METHOD(isReady:(RCTResponseSenderBlock)callback)
             [[Criteo sharedCriteo] enrichAdObject:request withBid:bid];
         }
 
-        request.testDevices = _testDevices;
-        [_interstitial loadRequest:request];
+        [GAMInterstitialAd loadWithAdManagerAdUnitID:_adUnitID
+                              request:request
+                    completionHandler:^(GAMInterstitialAd *ad, NSError *error) {
+        if (error) {
+            NSLog(@"Failed to load interstitial ad with error: %@", [error localizedDescription]);
+            _requestAdReject(@"E_AD_REQUEST_FAILED", error.localizedDescription, error);
+        } else {
+            _interstitial = ad;
+            _interstitial.fullScreenContentDelegate = self;
+            _requestAdResolve(nil);
+        }    
+        }];
     }];
 }
 
@@ -156,39 +160,39 @@ RCT_EXPORT_METHOD(isReady:(RCTResponseSenderBlock)callback)
 - (void)onSuccess: (DTBAdResponse *)adResponse {
     NSLog(@"DTB - Interstitial Loaded :)");
     // Code from Google Ad Manager to set up Google Ad Manager's ad view.
-    _interstitial = [[GAMInterstitial alloc] initWithAdUnitID:_adUnitID];
-    _interstitial.delegate = self;
-    
     [[Criteo sharedCriteo] loadBidForAdUnit:[RNGAMConfig sharedInstance].GAM2Criteo[@"interstitial"] responseHandler:^(CRBid *bid) {
         
         NSLog(@"Criteo - unit %@", [RNGAMConfig sharedInstance].GAM2Criteo[@"interstitial"]);
 
         GAMRequest *request = [GAMRequest request];
-        
         // Add APS Keywords.
-        request.customTargeting = adResponse.customTargeting;
-
+        // request.customTargeting = adResponse.customTargeting;
+        NSLog(@"loadWithAdManagerAdUnitID");
         if (bid != nil) {
             // add Criteo bids into Ad Manager request
             [[Criteo sharedCriteo] enrichAdObject:request withBid:bid];
         }
-
-        [_interstitial loadRequest:request];
+        NSLog(@"loadWithAdManagerAdUnitID");
+        [GAMInterstitialAd loadWithAdManagerAdUnitID:_adUnitID
+                              request:request
+                    completionHandler:^(GAMInterstitialAd *ad, NSError *error) {
+            
+        if (error) {
+            NSLog(@"Failed to load interstitial ad with error: %@", [error localizedDescription]);
+            _requestAdReject(@"E_AD_REQUEST_FAILED", error.localizedDescription, error);
+        }else {
+            NSLog(@"Interstitial Loaded");
+        }
+            _interstitial = ad;
+            _interstitial.fullScreenContentDelegate = self;
+        } ];
     }];
 }
 
-#pragma mark GAMInterstitialDelegate
-
-- (void)interstitialDidReceiveAd:(__unused GAMInterstitial *)ad
-{
-    if (hasListeners) {
-        [self sendEventWithName:kEventAdLoaded body:nil];
-    }
-    _requestAdResolve(nil);
-}
-
-- (void)interstitial:(__unused GAMInterstitial *)interstitial didFailToReceiveAdWithError:(NSError *)error
-{
+// Tells the delegate that the ad failed to present full screen content.
+- (void)ad:(nonnull id<GADFullScreenPresentingAd>)ad
+didFailToPresentFullScreenContentWithError:(nonnull NSError *)error {
+    NSLog(@"Ad did fail to present full screen content.");
     if (hasListeners) {
         NSDictionary *jsError = RCTJSErrorFromCodeMessageAndNSError(@"E_AD_REQUEST_FAILED", error.localizedDescription, error);
         [self sendEventWithName:kEventAdFailedToLoad body:jsError];
@@ -197,32 +201,19 @@ RCT_EXPORT_METHOD(isReady:(RCTResponseSenderBlock)callback)
     _requestAdReject(@"E_AD_REQUEST_FAILED", error.localizedDescription, error);
 }
 
-- (void)interstitialWillPresentScreen:(__unused GAMInterstitial *)ad
-{
+// Tells the delegate that the ad presented full screen content.
+- (void)adDidPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
+    NSLog(@"Ad did present full screen content.");
     if (hasListeners){
         [self sendEventWithName:kEventAdOpened body:nil];
     }
 }
 
-- (void)interstitialDidFailToPresentScreen:(__unused GAMInterstitial *)ad
-{
-    if (hasListeners){
-        [self sendEventWithName:kEventAdFailedToOpen body:nil];
-    }
-    _interstitial = nil;
-}
-
-- (void)interstitialWillDismissScreen:(__unused GAMInterstitial *)ad
-{
-    if (hasListeners) {
+// Tells the delegate that the ad dismissed full screen content.
+- (void)adDidDismissFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
+   NSLog(@"Ad did dismiss full screen content.");
+   if (hasListeners) {
         [self sendEventWithName:kEventAdClosed body:nil];
-    }
-}
-
-- (void)interstitialWillLeaveApplication:(__unused GAMInterstitial *)ad
-{
-    if (hasListeners) {
-        [self sendEventWithName:kEventAdLeftApplication body:nil];
     }
 }
 

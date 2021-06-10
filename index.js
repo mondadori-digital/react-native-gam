@@ -1,7 +1,10 @@
-// main index.js
-
-import { NativeModules } from 'react-native';
-
-const { RNGAM } = NativeModules;
-
-export default RNGAM;
+/* eslint-disable global-require */
+module.exports = {
+    get GAMBanner() {
+      return require('./RNGAMBanner').default;
+    },
+    get GAMInterstitial() {
+      return require('./RNGAMInterstitial').default;
+    },
+  };
+  

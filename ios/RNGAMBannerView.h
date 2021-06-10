@@ -9,12 +9,11 @@
 
 @class RCTEventDispatcher;
 
-@interface RNDFPBannerView : RCTView <GADBannerViewDelegate, GADAdSizeDelegate, GADAppEventDelegate>
+@interface RNGAMBannerView : RCTView <GADBannerViewDelegate, GADAdSizeDelegate, GADAppEventDelegate>
 
 @property (nonatomic, copy) NSArray *validAdSizes;
 @property (nonatomic, copy) NSArray *testDevices;
 
-@property (nonatomic) BOOL npa;
 @property (nonatomic) NSDictionary * location;
 @property (nonatomic) NSString * amazonSlotUUID;
 @property (nonatomic) NSString * adType;

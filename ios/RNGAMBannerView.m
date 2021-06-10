@@ -1,9 +1,15 @@
 #import "RNGAMBannerView.h"
 #import "RNGAMUtils.h"
 
+#if __has_include(<React/RCTBridgeModule.h>)
 #import <React/RCTBridgeModule.h>
 #import <React/UIView+React.h>
 #import <React/RCTLog.h>
+#else
+#import "RCTBridgeModule.h"
+#import "UIView+React.h"
+#import "RCTLog.h"
+#endif
 
 #include "RCTConvert+GADAdSize.h"
 #import <CriteoPublisherSdk/CriteoPublisherSdk.h>
@@ -53,6 +59,9 @@
     NSLog(@"DTB - andSlotUUID:%@", self.amazonSlotUUID);
     if (self.amazonSlotUUID) {
         // AMAZON request
+        if(self.contentURL) {
+            [DTBAds.sharedInstance addCustomAttribute:@"contentURL" value:self.contentURL];
+        }
         DTBAdSize *size = [[DTBAdSize alloc] initBannerAdSizeWithWidth:_bannerView.frame.size.width height:_bannerView.frame.size.height andSlotUUID:self.amazonSlotUUID];
         DTBAdLoader *adLoader = [DTBAdLoader new];
         [adLoader setSizes:size, nil];
@@ -60,6 +69,7 @@
     } else {
         [self requestBanner];
     }
+
 }
 
 - (void)requestBanner {
@@ -69,6 +79,11 @@
         
         GAMRequest *request = [GAMRequest request];
         
+        // contentUrl
+        if(self.contentURL) {
+            request.contentURL = self.contentURL; 
+        }
+
         // localizzazione
         if (self.location) {
             [request setLocationWithLatitude:[self.location[@"latitude"] doubleValue]
@@ -81,7 +96,7 @@
             [[Criteo sharedCriteo] enrichAdObject:request withBid:bid];
         }
         
-        request.testDevices = _testDevices;
+        // request.testDevices = _testDevices;
         [_bannerView loadRequest:request];
     }];
 }
@@ -126,10 +141,10 @@
     _bannerView.validAdSizes = validAdSizes;
 }
 
-- (void)setTestDevices:(NSArray *)testDevices
-{
-    _testDevices = RNGAMMobProcessTestDevices(testDevices, kDFPSimulatorID);
-}
+// - (void)setTestDevices:(NSArray *)testDevices
+// {
+//     _testDevices = RNGAMMobProcessTestDevices(testDevices, kDFPSimulatorID);
+// }
 
 -(void)layoutSubviews
 {
@@ -204,6 +219,7 @@ didFailToReceiveAdWithError:(NSError *)error
     if (self.onAppEvent) {
         self.onAppEvent(@{ @"name": name, @"info": info });
     }
+    [DTBAdHelper skadnHelper:name withInfo:info];
 }
 
 @end

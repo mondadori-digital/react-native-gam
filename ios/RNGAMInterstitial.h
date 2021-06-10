@@ -9,5 +9,5 @@
 @import GoogleMobileAds;
 #import <DTBiOSSDK/DTBiOSSDK.h>
 
-@interface RNGAMInterstitial : RCTEventEmitter <RCTBridgeModule, GADInterstitialDelegate>
+@interface RNGAMInterstitial : RCTEventEmitter <RCTBridgeModule, GADFullScreenContentDelegate>
 @end
