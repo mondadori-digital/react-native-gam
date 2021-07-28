@@ -1,6 +1,6 @@
 // RNGAMPackage.java
 
-package it.mondadori;
+package it.mondadori.rngam;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,11 +14,15 @@ import com.facebook.react.uimanager.ViewManager;
 public class RNGAMPackage implements ReactPackage {
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Arrays.<NativeModule>asList(new RNGAMModule(reactContext));
+        return Arrays.<NativeModule>asList(
+            new RNGAMInterstitial(reactContext)
+        );
     }
 
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
-        return Collections.emptyList();
+        return Arrays.<ViewManager>asList(
+            new RNGAMBannerViewManager()
+        );
     }
 }

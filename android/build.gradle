@@ -12,10 +12,10 @@
 
 // These defaults should reflect the SDK versions used by
 // the minimum React Native version supported.
-def DEFAULT_COMPILE_SDK_VERSION = 28
-def DEFAULT_BUILD_TOOLS_VERSION = '28.0.3'
+def DEFAULT_COMPILE_SDK_VERSION = 29
+def DEFAULT_BUILD_TOOLS_VERSION = '29.0.3'
 def DEFAULT_MIN_SDK_VERSION = 16
-def DEFAULT_TARGET_SDK_VERSION = 28
+def DEFAULT_TARGET_SDK_VERSION = 29
 
 def safeExtGet(prop, fallback) {
     rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -71,7 +71,14 @@ repositories {
 
 dependencies {
     //noinspection GradleDynamicVersion
+    implementation fileTree(dir: "libs", include: ["*.jar"])
+    implementation(name: 'aps-sdk', ext:'aar')
     implementation 'com.facebook.react:react-native:+'  // From node_modules
+    implementation 'com.google.android.gms:play-services-ads:20.2.0'
+    // implementation 'com.amazon.android:aps-sdk:8.4.3@aar'
+    implementation 'com.criteo.publisher:criteo-publisher-sdk:4.4.0'
+    // implementation 'com.google.android.gms:play-services-ads-identifier:17.0.1'
+    // implementation 'com.google.android.gms:play-services-base:17.6.0'
 }
 
 def configureReactNativePom(def pom) {
@@ -81,7 +88,7 @@ def configureReactNativePom(def pom) {
         name packageJson.title
         artifactId packageJson.name
         version = packageJson.version
-        group = "it.mondadori"
+        group = "it.mondadori.rngam"
         description packageJson.description
         url packageJson.repository.baseUrl
 
