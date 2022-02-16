@@ -4,6 +4,7 @@ import android.util.Log;
 import android.content.Context;
 import androidx.annotation.Nullable;
 import android.view.View;
+import android.view.ViewGroup;
 import android.os.Bundle;
 import android.location.Location;
 
@@ -63,6 +64,7 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
 
         final Context context = getContext();
         this.adView = new AdManagerAdView(context);
+        this.adView.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
         this.adView.setAppEventListener(this);
         this.adView.setAdListener(new AdListener() {
             @Override
