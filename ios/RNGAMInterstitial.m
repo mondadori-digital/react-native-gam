@@ -97,11 +97,14 @@ RCT_EXPORT_METHOD(requestAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromise
 
 RCT_EXPORT_METHOD(showAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
+    NSLog(@"RNGAMInterstitial - showAd");
     if (_interstitial) {
+        NSLog(@"RNGAMInterstitial - Ad is ready");
         [_interstitial presentFromRootViewController:[UIApplication sharedApplication].delegate.window.rootViewController];
         resolve(nil);
     }
     else {
+        NSLog(@"RNGAMInterstitial - Ad is not ready");
         reject(@"E_AD_NOT_READY", @"Ad is not ready.", nil);
     }
 }
@@ -180,11 +183,13 @@ RCT_EXPORT_METHOD(showAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRej
         if (error) {
             NSLog(@"Failed to load interstitial ad with error: %@", [error localizedDescription]);
             _requestAdReject(@"E_AD_REQUEST_FAILED", error.localizedDescription, error);
-        }else {
+        } else {
             NSLog(@"Interstitial Loaded");
-        }
+        
             _interstitial = ad;
             _interstitial.fullScreenContentDelegate = self;
+            _requestAdResolve(nil);
+            }
         } ];
     }];
 }
@@ -207,6 +212,11 @@ didFailToPresentFullScreenContentWithError:(nonnull NSError *)error {
     if (hasListeners){
         [self sendEventWithName:kEventAdOpened body:nil];
     }
+}
+
+// Tells the delegate that the ad will present full screen content.
+- (void)adWillPresentFullScreenContent:(nonnull id<GADFullScreenPresentingAd>)ad {
+    NSLog(@"Ad will present full screen content.");
 }
 
 // Tells the delegate that the ad dismissed full screen content.

@@ -225,19 +225,21 @@ public class RNGAMInterstitial extends ReactContextBaseJavaModule {
 
                                 @Override
                                 public void onFailure(com.amazon.device.ads.AdError adError) {
-                                    Log.e("APP", "Failed to get the interstitial ad from Amazon" + adError.getMessage());
+                                    Log.e("RNGAMInterstitial", "Failed to get the interstitial ad from Amazon" + adError.getMessage());
                                     loadAdManagerBanner(bid);
                                 }
 
                                 @Override
                                 public void onSuccess(DTBAdResponse dtbAdResponse) {
+                                    Log.e("RNGAMInterstitial", "Loaded interstitial ad from Amazon");
                                     AdManagerAdRequest.Builder adRequestBuilder = DTBAdUtil.INSTANCE.createAdManagerAdRequestBuilder(dtbAdResponse);
                                     if (bid != null) {
-                                        Log.d("loadInterstitialBanner", "Criteo bid is not null");
+                                        Log.d("RNGAMInterstitial", "Criteo bid is not null");
                                         Criteo.getInstance().enrichAdObjectWithBid(adRequestBuilder, bid);
                                     }
+                                    Log.e("RNGAMInterstitial", "build");
                                     AdManagerAdRequest adRequest = adRequestBuilder.build();
-        
+                                    Log.e("RNGAMInterstitial", "load");
                                     AdManagerInterstitialAd.load(mReactApplicationContext, adUnitID, adRequest, new AdManagerInterstitialAdLoadCallback() {
                                         @Override
                                         public void onAdLoaded(@NonNull AdManagerInterstitialAd adManagerInterstitialAd) {
@@ -271,17 +273,25 @@ public class RNGAMInterstitial extends ReactContextBaseJavaModule {
                                                     sendEvent(EVENT_AD_FAILED_TO_LOAD, event);
                                                 }
                                             });
+                                            sendEvent(EVENT_AD_LOADED, null);
+                                            mRequestAdPromise.resolve(null);
                                         }
 
                                         @Override
                                         public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                                             super.onAdFailedToLoad(loadAdError);
+                                            // Handle the error
+                                            String errorMessage = loadAdError.getMessage();
+                                            Log.i("RNGAMInterstitial", errorMessage);
+                                            mAdManagerInterstitialAd = null;
+                                            mRequestAdPromise.reject("" + loadAdError.getCode(), errorMessage);
                                         }
                                     });
+                                    
                                 }
                             });
                         }  else {
-                            Log.d("loadInterstitialBanner", "amazonSlotUUID is null");
+                            Log.d("RNGAMInterstitial", "amazonSlotUUID is null");
                             loadAdManagerBanner(bid);
                         }
                     }
@@ -296,6 +306,7 @@ public class RNGAMInterstitial extends ReactContextBaseJavaModule {
             @Override
             public void run () {
                 if (mAdManagerInterstitialAd != null) {
+                    Log.d("RNGAMInterstitial", "The interstitial ad is ready. Show it");
                     mAdManagerInterstitialAd.show(getCurrentActivity());
                     promise.resolve(null);
                 } else {
