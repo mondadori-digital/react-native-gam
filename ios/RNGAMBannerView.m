@@ -36,7 +36,7 @@
         UIWindow *keyWindow = [[UIApplication sharedApplication] keyWindow];
         UIViewController *rootViewController = [keyWindow rootViewController];
 
-        _bannerView = [[GAMBannerView alloc] initWithAdSize:kGADAdSizeBanner];
+        _bannerView = [[GAMBannerView alloc] initWithAdSize:GADAdSizeBanner];
         _bannerView.delegate = self;
         _bannerView.adSizeDelegate = self;
         _bannerView.appEventDelegate = self;
@@ -85,11 +85,11 @@
         }
 
         // localizzazione
-        if (self.location) {
-            [request setLocationWithLatitude:[self.location[@"latitude"] doubleValue]
-            longitude:[self.location[@"longitude"] doubleValue]
-            accuracy:[self.location[@"accuracy"] doubleValue]];
-        }
+        // if (self.location) {
+        //     [request setLocationWithLatitude:[self.location[@"latitude"] doubleValue]
+        //     longitude:[self.location[@"longitude"] doubleValue]
+        //     accuracy:[self.location[@"accuracy"] doubleValue]];
+        // }
         
         // add Criteo bids into Ad Manager request
         if (bid != nil) {
@@ -132,7 +132,7 @@
     __block NSMutableArray *validAdSizes = [[NSMutableArray alloc] initWithCapacity:adSizes.count];
     [adSizes enumerateObjectsUsingBlock:^(id jsonValue, NSUInteger idx, __unused BOOL *stop) {
         GADAdSize adSize = [RCTConvert GADAdSize:jsonValue];
-        if (GADAdSizeEqualToSize(adSize, kGADAdSizeInvalid)) {
+        if (GADAdSizeEqualToSize(adSize, GADAdSizeInvalid)) {
             RCTLogWarn(@"Invalid adSize %@", jsonValue);
         } else {
             [validAdSizes addObject:NSValueFromGADAdSize(adSize)];

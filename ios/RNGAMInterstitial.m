@@ -62,7 +62,7 @@ RCT_EXPORT_METHOD(setAdUnitID:(NSString *)adUnitID amazonSlotUUID:(NSString *)am
 
 RCT_EXPORT_METHOD(setTestDevices:(NSArray *)testDevices)
 {
-    _testDevices = RNGAMProcessTestDevices(testDevices, kGADSimulatorID);
+    _testDevices = RNGAMProcessTestDevices(testDevices, GADSimulatorID);
 }
 
 RCT_EXPORT_METHOD(setLocation:(NSDictionary *)location)
@@ -128,11 +128,11 @@ RCT_EXPORT_METHOD(showAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRej
         GAMRequest *request = [GAMRequest request];
         
         // localizzazione
-        if (_location) {
-            [request setLocationWithLatitude:[_location[@"latitude"] doubleValue]
-            longitude:[_location[@"longitude"] doubleValue]
-            accuracy:[_location[@"accuracy"] doubleValue]];
-        }
+        // if (_location) {
+        //     [request setLocationWithLatitude:[_location[@"latitude"] doubleValue]
+        //     longitude:[_location[@"longitude"] doubleValue]
+        //     accuracy:[_location[@"accuracy"] doubleValue]];
+        // }
         
         if (bid != nil) {
             // add Criteo bids into Ad Manager request

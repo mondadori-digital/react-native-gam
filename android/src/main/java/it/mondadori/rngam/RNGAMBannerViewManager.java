@@ -153,13 +153,13 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
         //     MobileAds.setRequestConfiguration(configuration);
         // }
         
-        if (location != null && location.hasKey("latitude") && !location.isNull("latitude") && location.hasKey("longitude") && !location.isNull("longitude")) {
-            Location advLocation = new Location("");
-            advLocation.setLatitude(location.getDouble("latitude"));
-            advLocation.setLongitude(location.getDouble("longitude"));
+        // if (location != null && location.hasKey("latitude") && !location.isNull("latitude") && location.hasKey("longitude") && !location.isNull("longitude")) {
+        //     Location advLocation = new Location("");
+        //     advLocation.setLatitude(location.getDouble("latitude"));
+        //     advLocation.setLongitude(location.getDouble("longitude"));
 
-            adRequestBuilder.setLocation(advLocation);
-        }
+        //     adRequestBuilder.setLocation(advLocation);
+        // }
 
         // Criteo
         if (bid != null) {
