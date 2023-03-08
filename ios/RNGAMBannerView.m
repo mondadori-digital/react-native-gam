@@ -78,6 +78,7 @@
         NSLog(@"Criteo - unit %@", [RNGAMConfig sharedInstance].GAM2Criteo[self.adType]);
         
         GAMRequest *request = [GAMRequest request];
+        if (self.customTargeting) request.customTargeting = self.customTargeting;
         
         // contentUrl
         if(self.contentURL) {
@@ -114,7 +115,14 @@
         NSLog(@"Criteo - adType %@", self.adType);
         NSLog(@"Criteo - unit %@", [RNGAMConfig sharedInstance].GAM2Criteo[self.adType]);
         GAMRequest *request = [GAMRequest request];
-        request.customTargeting = adResponse.customTargeting;
+
+        NSMutableDictionary *custTarg = [[NSMutableDictionary alloc] init];
+        [custTarg addEntriesFromDictionary: adResponse.customTargeting];
+        if (self.customTargeting) [custTarg addEntriesFromDictionary: self.customTargeting];
+        NSLog(@"customTargeting %@", custTarg);
+
+        request.customTargeting = custTarg;
+
         if (bid != nil) {
             // add Criteo bids into Ad Manager request
             [[Criteo sharedCriteo] enrichAdObject:request withBid:bid];

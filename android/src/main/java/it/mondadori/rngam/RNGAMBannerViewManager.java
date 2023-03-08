@@ -11,6 +11,8 @@ import android.location.Location;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
+import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableNativeArray;
@@ -25,7 +27,7 @@ import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.admanager.*;
 import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.admanager.AdManagerAdRequest;
 // import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.MobileAds;
 import com.google.ads.mediation.admob.AdMobAdapter;
@@ -50,6 +52,7 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
     String amazonSlotUUID;
     AdSize adSize;
     ReadableMap location;
+    ReadableMap customTargeting;
 
     public ReactPublisherAdView(final Context context) {
         super(context);
@@ -84,16 +87,16 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
                 String errorMessage = error.getMessage();
                 int errorCode = error.getCode();
                 // switch (errorCode) {
-                //     case AdRequest.ERROR_CODE_INTERNAL_ERROR:
+                //     case AdManagerAdRequest.ERROR_CODE_INTERNAL_ERROR:
                 //         errorMessage = "Internal error, an invalid response was received from the ad server.";
                 //         break;
-                //     case AdRequest.ERROR_CODE_INVALID_REQUEST:
+                //     case AdManagerAdRequest.ERROR_CODE_INVALID_REQUEST:
                 //         errorMessage = "Invalid ad request, possibly an incorrect ad unit ID was given.";
                 //         break;
-                //     case AdRequest.ERROR_CODE_NETWORK_ERROR:
+                //     case AdManagerAdRequest.ERROR_CODE_NETWORK_ERROR:
                 //         errorMessage = "The ad request was unsuccessful due to network connectivity.";
                 //         break;
-                //     case AdRequest.ERROR_CODE_NO_FILL:
+                //     case AdManagerAdRequest.ERROR_CODE_NO_FILL:
                 //         errorMessage = "The ad request was successful, but no ad was returned due to lack of ad inventory.";
                 //         break;
                 // }
@@ -146,7 +149,7 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
     }
 
     private void loadAdManagerBanner(@Nullable Bid bid) {
-        AdRequest.Builder adRequestBuilder = new AdRequest.Builder();
+        AdManagerAdRequest.Builder adRequestBuilder = new AdManagerAdRequest.Builder();
         
         // if (testDevices != null) {
         //     RequestConfiguration configuration = new RequestConfiguration.Builder().setTestDeviceIds(testDevices).build();
@@ -166,8 +169,18 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
             Log.d("loadBanner", "Criteo bid is not null");
             Criteo.getInstance().enrichAdObjectWithBid(adRequestBuilder, bid);
         }
+        if (customTargeting != null) {
+            ReadableMapKeySetIterator iterator = customTargeting.keySetIterator();
+            while (iterator.hasNextKey()) {
+                String key = iterator.nextKey();
+                ReadableType type = customTargeting.getType(key);
+                if (type == ReadableType.String){
+                    adRequestBuilder.addCustomTargeting(key, customTargeting.getString(key));
+                }
+            }
+        }
 
-        AdRequest adRequest = adRequestBuilder.build();
+        AdManagerAdRequest adRequest = adRequestBuilder.build();
         this.adView.loadAd(adRequest);
     }
 
@@ -213,12 +226,22 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
                         public void onSuccess(DTBAdResponse dtbAdResponse) {
                             Log.d("loadBanner", "success");
                             // Build Google Ad Manager request with APS keywords
-                            AdRequest.Builder adRequestBuilder = DTBAdUtil.INSTANCE.createAdManagerAdRequestBuilder(dtbAdResponse);
+                            AdManagerAdRequest.Builder adRequestBuilder = DTBAdUtil.INSTANCE.createAdManagerAdRequestBuilder(dtbAdResponse);
                             if (bid != null) {
                                 Log.d("loadBanner", "Criteo bid is not null");
                                 Criteo.getInstance().enrichAdObjectWithBid(adRequestBuilder, bid);
                             }
-                            final AdRequest adRequest = adRequestBuilder.build();
+                            if (customTargeting != null) {
+                                ReadableMapKeySetIterator iterator = customTargeting.keySetIterator();
+                                while (iterator.hasNextKey()) {
+                                    String key = iterator.nextKey();
+                                    ReadableType type = customTargeting.getType(key);
+                                    if (type == ReadableType.String){
+                                        adRequestBuilder.addCustomTargeting(key, customTargeting.getString(key));
+                                    }
+                                }
+                            }
+                            final AdManagerAdRequest adRequest = adRequestBuilder.build();
                             adView.loadAd(adRequest);
                         }
                     });
@@ -258,6 +281,10 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
         this.location = location;
     }
 
+    public void setCustomTargeting(ReadableMap customTargeting) {
+        this.customTargeting = customTargeting;
+    }
+
     public void setAdSize(AdSize adSize) {
         this.adSize = adSize;
     }
@@ -286,6 +313,7 @@ public class RNGAMBannerViewManager extends ViewGroupManager<ReactPublisherAdVie
     public static final String PROP_AMAZON_SLOT_UUID = "amazonSlotUUID";
     public static final String PROP_TEST_DEVICES = "testDevices";
     public static final String PROP_LOCATION = "location";
+    public static final String PROP_CUSTOM_TARGETING = "customTargeting";
 
     public static final String EVENT_SIZE_CHANGE = "onSizeChange";
     public static final String EVENT_AD_LOADED = "onAdLoaded";
@@ -377,6 +405,11 @@ public class RNGAMBannerViewManager extends ViewGroupManager<ReactPublisherAdVie
     @ReactProp(name = PROP_LOCATION)
     public void setPropLocation(final ReactPublisherAdView view, final ReadableMap location) {
         view.setLocation(location);
+    }
+
+     @ReactProp(name = PROP_CUSTOM_TARGETING)
+    public void setCustomTargeting(final ReactPublisherAdView view, final ReadableMap customTargeting) {
+        view.setCustomTargeting(customTargeting);
     }
 
     private AdSize getAdSizeFromString(String adSize) {

@@ -1,13 +1,13 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 import {
   requireNativeComponent,
   UIManager,
   findNodeHandle,
   ViewPropTypes,
-} from 'react-native';
-import { string, func, arrayOf, bool, object } from 'prop-types';
+} from "react-native";
+import { string, func, arrayOf, bool, object } from "prop-types";
 
-import { createErrorFromErrorData } from './utils';
+import { createErrorFromErrorData } from "./utils";
 
 class GAMBanner extends Component {
   constructor() {
@@ -38,7 +38,7 @@ class GAMBanner extends Component {
   loadBanner() {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(this._bannerView),
-      UIManager.getViewManagerConfig('RNGAMBannerView').Commands.loadBanner,
+      UIManager.getViewManagerConfig("RNGAMBannerView").Commands.loadBanner,
       null
     );
   }
@@ -67,7 +67,7 @@ class GAMBanner extends Component {
   }
 
   render() {
-    console.log('RNGAMBannerView render', typeof RNGAMBannerView);
+    console.log("RNGAMBannerView render", typeof RNGAMBannerView);
     return (
       <RNGAMBannerView
         {...this.props}
@@ -81,7 +81,7 @@ class GAMBanner extends Component {
   }
 }
 
-GAMBanner.simulatorId = 'SIMULATOR';
+GAMBanner.simulatorId = "SIMULATOR";
 
 GAMBanner.propTypes = {
   ...ViewPropTypes,
@@ -135,12 +135,10 @@ GAMBanner.propTypes = {
   amazonSlotUUID: string,
   adType: string,
   contentURL: string,
+  customTargeting: object,
 };
 
-const RNGAMBannerView = requireNativeComponent(
-  'RNGAMBannerView',
-  GAMBanner
-);
-console.log('RNGAMBannerView', RNGAMBannerView);
+const RNGAMBannerView = requireNativeComponent("RNGAMBannerView", GAMBanner);
+console.log("RNGAMBannerView", RNGAMBannerView);
 
 export default GAMBanner;

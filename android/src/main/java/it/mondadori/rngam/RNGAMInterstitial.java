@@ -17,6 +17,8 @@ import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableNativeArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.ReadableMapKeySetIterator;
+import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -53,6 +55,7 @@ public class RNGAMInterstitial extends ReactContextBaseJavaModule {
 
     String[] testDevices;
     ReadableMap location;
+    ReadableMap customTargeting;
     String amazonSlotUUID;
     String adUnitID;
 
@@ -124,6 +127,11 @@ public class RNGAMInterstitial extends ReactContextBaseJavaModule {
         this.location = location;
     }
 
+    @ReactMethod
+    public void setCustomTargeting(ReadableMap customTargeting) {
+        this.customTargeting = customTargeting;
+    }
+
     private void loadAdManagerBanner(@Nullable Bid bid) {
         AdManagerAdRequest.Builder adRequestBuilder = new AdManagerAdRequest.Builder();
         // if (testDevices != null) {
@@ -146,6 +154,17 @@ public class RNGAMInterstitial extends ReactContextBaseJavaModule {
 
         if (bid != null) {
             Criteo.getInstance().enrichAdObjectWithBid(adRequestBuilder, bid);
+        }
+
+        if (customTargeting != null) {
+            ReadableMapKeySetIterator iterator = customTargeting.keySetIterator();
+            while (iterator.hasNextKey()) {
+                String key = iterator.nextKey();
+                ReadableType type = customTargeting.getType(key);
+                if (type == ReadableType.String){
+                    adRequestBuilder.addCustomTargeting(key, customTargeting.getString(key));
+                }
+            }
         }
 
         AdManagerAdRequest adRequest = adRequestBuilder.build();
