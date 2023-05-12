@@ -3,8 +3,8 @@ import {
   requireNativeComponent,
   UIManager,
   findNodeHandle,
-  ViewPropTypes,
 } from "react-native";
+import { ViewPropTypes } from "deprecated-react-native-prop-types";
 import { string, func, arrayOf, bool, object } from "prop-types";
 
 import { createErrorFromErrorData } from "./utils";
