@@ -58,6 +58,7 @@ public class RNGAMInterstitial extends ReactContextBaseJavaModule {
     ReadableMap customTargeting;
     String amazonSlotUUID;
     String adUnitID;
+    String ppid;
 
     private Promise mRequestAdPromise;
     private final ReactApplicationContext mReactApplicationContext;
@@ -132,6 +133,11 @@ public class RNGAMInterstitial extends ReactContextBaseJavaModule {
         this.customTargeting = customTargeting;
     }
 
+    @ReactMethod
+    public void setPpid(String ppid) {
+        this.ppid = ppid;
+    }
+
     private void loadAdManagerBanner(@Nullable Bid bid) {
         AdManagerAdRequest.Builder adRequestBuilder = new AdManagerAdRequest.Builder();
         // if (testDevices != null) {
@@ -165,6 +171,10 @@ public class RNGAMInterstitial extends ReactContextBaseJavaModule {
                     adRequestBuilder.addCustomTargeting(key, customTargeting.getString(key));
                 }
             }
+        }
+
+        if (ppid != null) {
+            adRequestBuilder.setPublisherProvidedId(ppid);
         }
 
         AdManagerAdRequest adRequest = adRequestBuilder.build();

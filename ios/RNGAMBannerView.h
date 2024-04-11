@@ -19,6 +19,7 @@
 @property (nonatomic) NSString * adType;
 @property (nonatomic) NSString * contentURL;
 @property (nonatomic) NSDictionary * customTargeting;
+@property (nonatomic) NSString * ppid;
 
 @property (nonatomic, copy) RCTBubblingEventBlock onSizeChange;
 @property (nonatomic, copy) RCTBubblingEventBlock onAppEvent;

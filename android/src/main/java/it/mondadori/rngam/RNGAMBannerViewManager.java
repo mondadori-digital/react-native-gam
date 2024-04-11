@@ -53,6 +53,7 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
     AdSize adSize;
     ReadableMap location;
     ReadableMap customTargeting;
+    String ppid;
 
     public ReactPublisherAdView(final Context context) {
         super(context);
@@ -180,6 +181,10 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
             }
         }
 
+        if (ppid != null) {
+            adRequestBuilder.setPublisherProvidedId(ppid);
+        }
+
         AdManagerAdRequest adRequest = adRequestBuilder.build();
         this.adView.loadAd(adRequest);
     }
@@ -240,6 +245,9 @@ class ReactPublisherAdView extends ReactViewGroup implements AppEventListener {
                                         adRequestBuilder.addCustomTargeting(key, customTargeting.getString(key));
                                     }
                                 }
+                            }
+                            if (ppid != null) {
+                                adRequestBuilder.setPublisherProvidedId(ppid);
                             }
                             final AdManagerAdRequest adRequest = adRequestBuilder.build();
                             adView.loadAd(adRequest);

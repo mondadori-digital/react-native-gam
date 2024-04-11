@@ -136,6 +136,7 @@ GAMBanner.propTypes = {
   adType: string,
   contentURL: string,
   customTargeting: object,
+  ppid: string,
 };
 
 const RNGAMBannerView = requireNativeComponent("RNGAMBannerView", GAMBanner);

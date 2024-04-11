@@ -79,6 +79,8 @@
         
         GAMRequest *request = [GAMRequest request];
         if (self.customTargeting) request.customTargeting = self.customTargeting;
+
+        if (self.ppid) request.publisherProvidedID = self.ppid;
         
         // contentUrl
         if(self.contentURL) {
@@ -122,6 +124,8 @@
         NSLog(@"customTargeting %@", custTarg);
 
         request.customTargeting = custTarg;
+
+        if (self.ppid) request.publisherProvidedID = self.ppid;
 
         if (bid != nil) {
             // add Criteo bids into Ad Manager request

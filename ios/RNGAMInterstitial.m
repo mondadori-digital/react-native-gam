@@ -28,6 +28,7 @@ static NSString *const kEventAdLeftApplication = @"interstitialAdLeftApplication
     BOOL hasListeners;
     NSDictionary *_location;
     NSDictionary *_customTargeting;
+    NSString *_ppid;
 }
 
 - (dispatch_queue_t)methodQueue
@@ -74,6 +75,11 @@ RCT_EXPORT_METHOD(setLocation:(NSDictionary *)location)
 RCT_EXPORT_METHOD(setCustomTargeting:(NSDictionary *)customTargeting)
 {
     _customTargeting = customTargeting;
+}
+
+RCT_EXPORT_METHOD(setPpid:(NSString *)ppid)
+{
+    _ppid = ppid;
 }
 
 RCT_EXPORT_METHOD(requestAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
@@ -177,6 +183,7 @@ RCT_EXPORT_METHOD(showAd:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRej
         // Add APS Keywords.
         // request.customTargeting = adResponse.customTargeting;
         if (_customTargeting) request.customTargeting = _customTargeting;
+        if (_ppid) request.publisherProvidedID = _ppid;
         NSLog(@"loadWithAdManagerAdUnitID");
         if (bid != nil) {
             // add Criteo bids into Ad Manager request
