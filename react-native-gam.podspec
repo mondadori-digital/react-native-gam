@@ -35,7 +35,7 @@ Pod::Spec.new do |s|
   }
 
   s.dependency "React"
-  s.dependency 'AmazonPublisherServicesSDK', '3.4.6'
+  s.dependency 'AmazonPublisherServicesSDK', '4.9.2'
   s.dependency 'CriteoPublisherSdk'
   
 end
