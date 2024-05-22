@@ -9,7 +9,10 @@
     "android",
     "index.js",
     "ios",
-    "react-native-gam.podspec"
+    "react-native-gam.podspec",
+    "RNGAMBanner.js",
+    "RNGAMInterstitial.js",
+    "utils.js"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
